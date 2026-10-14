@@ -19,6 +19,10 @@ public class Restdishser {
         return rp.save(dish);
     }
 
+    public List<Restdishentity> getAllDishes() {
+        return rp.findAll();
+    }
+
     public List<Restdishentity> getDishesByRestaurantId(Long restaurantId) {
         return rp.findByRestaurantId(restaurantId);
     }
@@ -35,8 +39,7 @@ public class Restdishser {
         return rp.findById(id);
     }
 
-
     public List<Restdishentity> getDishesByRestaurantName(String restaurantName) {
-    return rp.findByRestaurantName(restaurantName);
-}
+        return rp.findByRestaurantName(restaurantName);
+    }
 }

@@ -17,9 +17,21 @@ public class Resturantloginentity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long restaurantId;
 
-    @Column(name = "restaurantname")
+    @Column(name = "restaurantname", unique = true)
     private String restaurantName;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "role")
+    private String role = "RESTAURANT";
+
+    @Column(name = "created_at")
+    private String createdAt;
 }

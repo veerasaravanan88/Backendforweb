@@ -19,32 +19,52 @@ public class Restdishdata {
     @Autowired
     private Restdishser rds;
 
+    // GET ALL DISHES (Fixes 404 error from Dashboard.js)
+    @GetMapping("/getall")
+    public ResponseEntity<List<Restdishentity>> getAllDishes() {
+        List<Restdishentity> dishes = rds.getAllDishes();
+        return ResponseEntity.ok(dishes);
+    }
+
     @PostMapping("/insertdish")
-    public ResponseEntity<Restdishentity> insertDish(
+    public ResponseEntity<?> insertDish(
             @RequestParam("restaurantId") Long restaurantId,
             @RequestParam("restaurantName") String restaurantName,
             @RequestParam("dishName") String dishName,
             @RequestParam("category") String category,
             @RequestParam("price") Double price,
             @RequestParam("quantity") Integer quantity,
-            @RequestParam("description") String description,
-            @RequestParam(value = "dishImage", required = false) MultipartFile file) throws IOException {
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "dishImage", required = false) MultipartFile file) {
 
-        Restdishentity dish = new Restdishentity();
-        dish.setRestaurantId(restaurantId);
-        dish.setRestaurantName(restaurantName);
-        dish.setDishName(dishName);
-        dish.setCategory(category);
-        dish.setPrice(price);
-        dish.setQuantity(quantity);
-        dish.setDescription(description);
+        try {
+            if (dishName == null || dishName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Dish name cannot be empty");
+            }
+            if (price == null || price <= 0) {
+                return ResponseEntity.badRequest().body("Price must be greater than zero");
+            }
 
-     if (file != null && !file.isEmpty()) {
-    dish.setDishImage(file.getBytes());
-}
+            Restdishentity dish = new Restdishentity();
+            dish.setRestaurantId(restaurantId);
+            dish.setRestaurantName(restaurantName != null ? restaurantName.trim() : "");
+            dish.setDishName(dishName.trim());
+            dish.setCategory(category != null ? category.trim() : "Main Course");
+            dish.setPrice(price);
+            dish.setQuantity(quantity != null ? Math.max(0, quantity) : 0);
+            dish.setDescription(description != null ? description.trim() : "");
 
-        Restdishentity savedDish = rds.saveDish(dish);
-        return ResponseEntity.ok(savedDish);
+            if (file != null && !file.isEmpty()) {
+                dish.setDishImage(file.getBytes());
+            }
+
+            Restdishentity savedDish = rds.saveDish(dish);
+            return ResponseEntity.ok(savedDish);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("Failed to process image");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error saving dish: " + e.getMessage());
+        }
     }
 
     @GetMapping("/restaurantId/{restaurantId}")
@@ -60,18 +80,16 @@ public class Restdishdata {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Restdishentity> updateDish(@RequestBody Restdishentity dish) {
+    public ResponseEntity<?> updateDish(@RequestBody Restdishentity dish) {
+        if (dish.getId() == null) {
+            return ResponseEntity.badRequest().body("Dish ID required for update");
+        }
         return ResponseEntity.ok(rds.updateDish(dish));
     }
 
-
     @GetMapping("/restaurant/{restaurantName}")
-public ResponseEntity<List<Restdishentity>> getDishesByRestaurantName(
-        @PathVariable String restaurantName) {
-
-    List<Restdishentity> dishes =
-            rds.getDishesByRestaurantName(restaurantName);
-
-    return ResponseEntity.ok(dishes);
-}
+    public ResponseEntity<List<Restdishentity>> getDishesByRestaurantName(@PathVariable String restaurantName) {
+        List<Restdishentity> dishes = rds.getDishesByRestaurantName(restaurantName);
+        return ResponseEntity.ok(dishes);
+    }
 }

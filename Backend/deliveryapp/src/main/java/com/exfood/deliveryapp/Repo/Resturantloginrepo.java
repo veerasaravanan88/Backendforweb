@@ -6,13 +6,15 @@ import org.springframework.stereotype.Repository;
 import com.exfood.deliveryapp.Entity.Resturantloginentity;
 
 @Repository
-public interface Resturantloginrepo
-        extends JpaRepository<Resturantloginentity, Long> {
+public interface Resturantloginrepo extends JpaRepository<Resturantloginentity, Long> {
 
-    Resturantloginentity findByRestaurantNameAndPassword(
-            String restaurantName,
-            String password
-    );
+    Resturantloginentity findByRestaurantNameAndPassword(String restaurantName, String password);
+
+    Resturantloginentity findByRestaurantName(String restaurantName);
+
+    Resturantloginentity findByEmail(String email);
 
     boolean existsByRestaurantName(String restaurantName);
+
+    boolean existsByEmail(String email);
 }
